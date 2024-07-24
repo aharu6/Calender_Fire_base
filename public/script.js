@@ -26,8 +26,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     appId: "1:242227279891:web:b1df4c5be7edb2424fe7e6",
     measurementId: "G-HQHL3M2B1D",
   };
+  //firebase initialize
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth();
 
   //emulator
   initializeApp(firebaseConfig);
@@ -44,7 +46,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     th.textContent = day;
     calnederheader.appendChild(th);
   });
-  //test
 
   const calender = document.getElementById("calender");
   const click = document.getElementById("click");
@@ -125,6 +126,40 @@ document.addEventListener("DOMContentLoaded", async () => {
     month.textContent = today.getMonth() + 1;
   });
 
+  //add user
+  //signUp
+
+  function signUp(email, password) {
+    const emailsakado = document.getElementById("signUpEmail").value;
+    const passWord = document.getElementById("signUpPassword").value;
+    createUserWithEmailAndPassword(auth, emailsakado, passWord)
+      .then((userCredential) => {
+        const user = userCredential.user;
+        console.log("User refisterd:", user);
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  }
+  window.signUp = signUp;
+
+  //signIn
+  function signIn(email, password) {
+    const email_sign = document.getElementById("signInEmail").value;
+    const password_sign = document.getElementById("signInPassword").value;
+    try {
+      signInWithEmailAndPassword(auth, email_sign, password_sign).then(
+        (userCredential) => {
+          const user = userCredential.user;
+          console.log("User logged in:", user);
+        }
+      );
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  }
+  window.signIn = signIn;
+
   //clickdata save
   async function saveData(date, clicked) {
     try {
@@ -140,6 +175,38 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error("Error adding document: ", e);
     }
   }
+
+  //load data
+  async function loadData() {
+    try {
+      const user = auth.currentUser;
+      console.log(user.uid);
+      if (user) {
+        const querySnapshot = await getDocs(collection(db, "calender"));
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.userId === user.uid) {
+            console.log(`${doc.id} => ${doc.data()}`);
+            updateCalender(doc.id, doc.data);
+          }
+        });
+      } else {
+        console.error("No user is signed in");
+      }
+    } catch (e) {
+      console.error("Error adding document:", e);
+    }
+  }
+  window.onload = loadData;
+  //observe user
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loadData(user);
+      console.log("User is logged in:", auth.currentUser.uid);
+    } else {
+      console.log("User is logged out");
+    }
+  });
   //retrieve click data
   async function getClickdata(date) {
     const docRef = doc(db, "clickData", date);
@@ -152,58 +219,4 @@ document.addEventListener("DOMContentLoaded", async () => {
       return null;
     }
   }
-  //load data
-  async function loadData() {
-    try {
-      const user = auth.curretUser;
-      if (user) {
-        const querySnapshot = await getDocs(collection(db, "calender"));
-        const querySnapshotUser = querySnapshot.data().userId === user.uid;
-        querySnapshotUser.forEach((doc) => {
-          console.log(`${doc.id} => ${doc.data()}`);
-          updateCalender(doc.id, doc.data);
-        });
-      } else {
-        console.error("No user is signed in");
-      }
-    } catch (e) {
-      console.error("Error adding document:", e);
-    }
-  }
-  window.onload = loadData();
-  //add user
-  const auth = getAuth();
-  function signUp(email, password) {
-    const emailsakado = document.getElementById("email").value;
-    const passWord = document.getElementById("signUpPassword").value;
-    createUserWithEmailAndPassword(auth, emailsakado, passWord)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log("User refisterd:", user);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }
-  window.signUp = signUp();
-  //signIn
-  function signIn(email, password) {
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
-        console.log("User logged in:", user);
-      })
-      .catch((error) => {
-        console.error("Error:", error);
-      });
-  }
-
-  //observe user
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      console.log("User is logged in:", user);
-    } else {
-      console.log("User is logged out");
-    }
-  });
 });
