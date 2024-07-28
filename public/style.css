@@ -14,6 +14,9 @@ h1 {
     .day-of-week {
       width: 10rem;
     }
+    #calender-table{
+      width:100vw;
+    }
     #calender {
       margin: 3rem;
       display: grid;
@@ -29,6 +32,9 @@ h1 {
     }
   }
   @media screen and (max-width: 700px) {
+    .navbar{
+      width: 100vw;
+    }
     #dayHead {
       margin: 2rem;
       display: none;
@@ -38,17 +44,20 @@ h1 {
     .day-of-week {
       width: 10rem;
     }
+    #calender-table{
+      width: 100vw;
+    }
     #calender {
       margin-right: 10rem;
       margin-left: 10rem;
       display: grid;
       grid-template-rows: repeat(6, 1fr);
-      width: 20rem;
+      width: 100vw;
       height: 30rem;
     }
     .cell {
       border: 0.01rem solid black;
-      width: 15rem;
+      width: 5rem;
       height: 3rem;
     }
   }

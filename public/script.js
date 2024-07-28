@@ -7,6 +7,7 @@ import {
   doc,
   setDoc,
   getDocs,
+  getDoc,
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import {
   getAuth,
@@ -49,23 +50,21 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const calender = document.getElementById("calender");
   const click = document.getElementById("click");
-  let clickCount = 0;
 
-  let clickedDates = JSON.parse(localStorage.getItem("clickedDates")) || {};
   //generate calender
   function generateCalender(year, month) {
     calender.innerHTML = "";
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
 
-    //空白セルのための前の月の日数
+    //first week day
     const firstWeekDay = firstDay.getDay();
     for (let i = 0; i < firstWeekDay; i++) {
       const emptycell = document.createElement("th");
       calender.appendChild(emptycell);
     }
 
-    //日付セル
+    //date cell
     for (let date = Number(1); date <= lastDay.getDate(); date++) {
       const cell = document.createElement("th");
       calender.appendChild(cell);
@@ -74,18 +73,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       cell.setAttribute("id", `${year}-${month + 1}-${date}`);
       //クリック状態の復元
       const dateKey = `${year}-${month + 1}-${date}`;
-      if (clickedDates[dateKey]) {
-        cell.classList.add("clicked");
-        clickCount++;
-      }
       cell.addEventListener("click", async (event) => {
-        updateCalender(`${year}-${month + 1}-${date}`, !clickedDates[dateKey]);
-        saveData(`${year}-${month + 1}-${date}`, !clickedDates[dateKey]);
+        const docRef = doc(db, "calender", dateKey);
+        const docSnap = await getDoc(docRef);
+        saveData(`${year}-${month + 1}-${date}`, docSnap.data().clicked);
+        console.log(docSnap.data().clicked);
+        updateCalender(`${year}-${month + 1}-${date}`, docSnap.data().clicked);
       });
     }
   }
   const today = new Date();
-
   generateCalender(today.getFullYear(), today.getMonth());
 
   //dates には作成した日付の全てが入る「dateで合わせた日付でクリックしたデータを紐づけて表示する
@@ -93,16 +90,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
   //全ての日付にてforを回す
   for (let date; date <= lastDayRe.getDate(); date++) {
-    console.log(date);
     let clicked = await getClickdata(date);
+    console.log(clicked);
     updateCalender(date, clicked);
   }
 
+  //updatecalender
   function updateCalender(date, clicked) {
     let dateElement = document.getElementById(date);
     if (dateElement) {
-      if (clicked) {
+      if (clicked === true) {
         dateElement.classList.add("clicked");
+      } else if (clicked === false) {
+        dateElement.classList.remove("clicked");
       } else {
         dateElement.classList.remove("clicked");
       }
@@ -118,6 +118,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     generateCalender(today.getFullYear(), today.getMonth());
     month.textContent = today.getMonth() + 1;
   });
+
   //next month
   const next = document.getElementById("next");
   next.addEventListener("click", function () {
@@ -128,7 +129,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   //add user
   //signUp
-
   function signUp(email, password) {
     const emailsakado = document.getElementById("signUpEmail").value;
     const passWord = document.getElementById("signUpPassword").value;
@@ -164,10 +164,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function saveData(date, clicked) {
     try {
       const user = auth.currentUser;
+      //ifdataexits なら!で反転させる
       if (user) {
         const docRef = doc(db, "calender", date);
-        await setDoc(docRef, { clicked: clicked, userId: user.uid });
-        console.log("Document written with ID;", docRef.id);
+        const docSnap = await getDoc(docRef);
+        let newClickedData = clicked;
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          newClickedData = !data.clicked;
+        }
+        await setDoc(docRef, { clicked: newClickedData, userId: user.uid });
+        console.log("Document written with ID;", docRef.id, newClickedData);
+        return newClickedData;
       } else {
         console.error("No user is sign in");
       }
@@ -175,6 +184,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error("Error adding document: ", e);
     }
   }
+  document.querySelectorAll;
 
   //load data
   async function loadData() {
@@ -186,8 +196,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           if (data.userId === user.uid) {
-            console.log(`${doc.id} => ${doc.data()}`);
-            updateCalender(doc.id, doc.data);
+            console.log(`${doc.id} => ${doc.data().clicked}`);
+            updateCalender(doc.id, doc.data().clicked);
           }
         });
       } else {
@@ -198,15 +208,26 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
   window.onload = loadData;
+
   //observe user
   onAuthStateChanged(auth, (user) => {
     if (user) {
       loadData(user);
       console.log("User is logged in:", auth.currentUser.uid);
+      //id = dropdownMenuButtonにatuth.CurrentUser.uidを入れる
+      const dropdownMenuButton = document.getElementById("dropdownMenuButton");
+      dropdownMenuButton.textContent = auth.currentUser.uid;
+      //login noView
+      document.getElementById("signInEmail").style.display = "none";
+      document.getElementById("signInPassword").style.display = "none";
+      document.getElementById("signIn").style.display = "none";
+      document.getElementById("logout").style.display = "block";
+      console.log(auth.currentUser.uid);
     } else {
       console.log("User is logged out");
     }
   });
+
   //retrieve click data
   async function getClickdata(date) {
     const docRef = doc(db, "clickData", date);
@@ -219,4 +240,31 @@ document.addEventListener("DOMContentLoaded", async () => {
       return null;
     }
   }
+
+  //logout
+  const logout = document.getElementById("logout");
+  logout.addEventListener("click", () => {
+    signOut(auth);
+  });
+  function signOut(auth) {
+    auth.signOut().then(() => {
+      console.log("User is signed out");
+      generateCalender(today.getFullYear(), today.getMonth());
+      const dropdownMenuButton = document.getElementById("dropdownMenuButton");
+      dropdownMenuButton.textContent = "NoUser";
+      //signIn review
+      document.getElementById("signInEmail").style.display = "block";
+      document.getElementById("signInPassword").style.display = "block";
+      document.getElementById("signIn").style.display = "block";
+      document.getElementById("logout").style.display = "none";
+    });
+  }
 });
+
+//誰がログインしているかの表示
+//ログアウト機能
+//ログインしている時はログインボタン不要
+//カレンダーのデザイン
+//ログイン画面のデザイン
+//非ログイン時はカレンダーを表示しない
+//ログイン→カレンダー画面の遷移

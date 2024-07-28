@@ -12,7 +12,7 @@
   </head>
   <body>
     <nav class="navbar navbar-light bg-light p-3">
-      <div class="d-flex col-12 col-md-3 col-lg-2 mb-2 mb-lg-0 flex-wrap flex-md-nowrap justify-content-between">
+      <div class="d-flex col-12 col-md-3 col-lg-2 mb-2 mb-lg-0 flex-wrap flex-md-nowrap justify-content-between" style="width: 100%;">
         <a class="navbar-brand" href="#">
           calender
     </a>
@@ -24,11 +24,10 @@
     <input class="form-control form-control-dark" type="text" placeholder="Search" aria-label="Search">
   </div>
   <div class="col-12 col-md-5 col-lg-8 d-flex align-items-center justify-content-md-end mt-3 mt-md-0">
-   
     <!---github link いらないかも-->
     <div class="dropdown">
       <button class="btn brn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-expanded="false">
-        Hello, world
+        NoUser
       </button>
       <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
         <li><a class="dropdown-item" href="#">Settings</a></li>
@@ -48,7 +47,8 @@
   <h2>Sign In</h2>
   <input type="email" id="signInEmail" placeholder="email">
   <input type="password" id="signInPassword" placeholder="password">
-  <button onclick="signIn()">Sign In</button>
+  <button onclick="signIn()" id="signIn">Sign In</button>
+  <button id= "logout">logout</button>
 </div>
     <div id = "month" class="fs-1"></div>
     <table id="dayHead">
@@ -56,9 +56,11 @@
         <tr id="calendar-header"></tr>
       </thead>
     </table>
-    <table>
+    <div id="calender-box">
+      <table id="calender-table">
       <tr id = "calender"></tr>   
     </table>
+  </div>
     <div id="click"></div>
     <div id="monthbutton">
       <button id="preview" class="btn-custom"><div id="leftarrow"></div>preview</button>
