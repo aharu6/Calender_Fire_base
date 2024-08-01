@@ -8,7 +8,10 @@ import {
   setDoc,
   getDocs,
   getDoc,
+  query,
+  where,
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getCountFromServer } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -50,7 +53,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const calender = document.getElementById("calender");
   const click = document.getElementById("click");
-
+  let clickedDates = JSON.parse(localStorage.getItem("clickedDates")) || {};
   //generate calender
   function generateCalender(year, month) {
     calender.innerHTML = "";
@@ -65,29 +68,50 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     //date cell
+    //状態の復元
     for (let date = Number(1); date <= lastDay.getDate(); date++) {
       const cell = document.createElement("th");
       calender.appendChild(cell);
       cell.textContent = date;
       cell.classList.add("cell");
       cell.setAttribute("id", `${year}-${month + 1}-${date}`);
-      //クリック状態の復元
       const dateKey = `${year}-${month + 1}-${date}`;
+      //クリック時の動作
       cell.addEventListener("click", async (event) => {
         const docRef = doc(db, "calender", dateKey);
         const docSnap = await getDoc(docRef);
-        saveData(`${year}-${month + 1}-${date}`, docSnap.data().clicked);
-        console.log(docSnap.data().clicked);
-        updateCalender(`${year}-${month + 1}-${date}`, docSnap.data().clicked);
+        if (docSnap.exists()) {
+          console.log("Document data:", docSnap.data().clicked);
+          saveData(`${year}-${month + 1}-${date}`, docSnap.data().clicked);
+          updateCalender(
+            `${year}-${month + 1}-${date}`,
+            !docSnap.data().clicked
+          );
+          console.log("updatecalender");
+        } else {
+          newSaveData(`${year}-${month + 1}-${date}`, !clickedDates[dateKey]);
+          updateCalender(
+            `${year}-${month + 1}-${date}`,
+            !clickedDates[dateKey]
+          );
+          console.log("newSaveData");
+        }
+        //countClick();
       });
     }
   }
   const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const date = today.getDate();
+  const dateKey = `${year}-${month + 1}-${date}`;
+
   generateCalender(today.getFullYear(), today.getMonth());
 
   //dates には作成した日付の全てが入る「dateで合わせた日付でクリックしたデータを紐づけて表示する
   const lastDayRe = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+
   //全ての日付にてforを回す
   for (let date; date <= lastDayRe.getDate(); date++) {
     let clicked = await getClickdata(date);
@@ -101,30 +125,45 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (dateElement) {
       if (clicked === true) {
         dateElement.classList.add("clicked");
+        console.log("updatecalenderclicked=true");
       } else if (clicked === false) {
         dateElement.classList.remove("clicked");
+        console.log("updatecalenderclicked = false");
       } else {
-        dateElement.classList.remove("clicked");
+        console.log("not clicked");
       }
     }
+    console.log("updatecalenderfunction");
   }
 
-  const month = document.getElementById("month");
-  month.textContent = today.getMonth() + 1;
+  const head_month = document.getElementById("month");
+  head_month.textContent = today.getMonth() + 1;
+
   //prev month
   const prev = document.getElementById("preview");
   prev.addEventListener("click", function () {
+    const prevwMonth = document.getElementById("month");
     today.setMonth(today.getMonth() - 1);
     generateCalender(today.getFullYear(), today.getMonth());
-    month.textContent = today.getMonth() + 1;
+    prevwMonth.textContent = today.getMonth() + 1;
+    const previewMonth = today.setMonth(today.getMonth() - 1);
+    const lastdayPre = new Date(today.getFullYear(), previewMonth, 0);
+    for (let date; date <= lastdayPre.getDate(); date++) {
+      let clicked = getClickdata(date);
+      console.log(clicked);
+      updateCalender(date, clicked);
+    }
+    loadData();
   });
 
   //next month
   const next = document.getElementById("next");
   next.addEventListener("click", function () {
+    const nextMonth = document.getElementById("month");
     today.setMonth(today.getMonth() + 1);
     generateCalender(today.getFullYear(), today.getMonth());
-    month.textContent = today.getMonth() + 1;
+    nextMonth.textContent = today.getMonth() + 1;
+    loadData();
   });
 
   //add user
@@ -160,7 +199,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
   window.signIn = signIn;
 
-  //clickdata save
+  //clickdata save　if docsnap.data().clickedが存在する時
   async function saveData(date, clicked) {
     try {
       const user = auth.currentUser;
@@ -168,20 +207,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (user) {
         const docRef = doc(db, "calender", date);
         const docSnap = await getDoc(docRef);
-        let newClickedData = clicked;
-
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          newClickedData = !data.clicked;
-        }
+        let newClickedData = !clicked;
+        const data = docSnap.data();
+        console.log(newClickedData);
         await setDoc(docRef, { clicked: newClickedData, userId: user.uid });
         console.log("Document written with ID;", docRef.id, newClickedData);
-        return newClickedData;
       } else {
-        console.error("No user is sign in");
+        console.error("No user is signed in");
       }
     } catch (e) {
       console.error("Error adding document: ", e);
+    }
+  }
+  //docsnap.data().clickedが存在しない時のsaveData関数
+  async function newSaveData(date, clicked) {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const docRef = doc(db, "calender", date);
+        const docSnap = await getDoc(docRef);
+        let newClickedData = clicked;
+        await setDoc(docRef, { clicked: newClickedData, userId: user.uid });
+      } else {
+        console.error("No user is signed in");
+      }
+    } catch (e) {
+      console.error("Error adding document:", e);
     }
   }
   document.querySelectorAll;
@@ -232,7 +283,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   async function getClickdata(date) {
     const docRef = doc(db, "clickData", date);
     const docSnap = await getDoc(docRef);
-    console.log(docSnap.data());
     if (docSnap.exists()) {
       return docSnap.data().clicked;
     } else {
@@ -259,12 +309,26 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("logout").style.display = "none";
     });
   }
+
+  //click day count
+  async function countClick() {
+    const coll = collection(db, "calender");
+    const q = query(coll, where("clicked", "==", "true"));
+    const snapshot = await getAggregate(q, {
+      totalpopulationa: sum("clicked"),
+    });
+  }
 });
 
-//誰がログインしているかの表示
-//ログアウト機能
-//ログインしている時はログインボタン不要
+//誰がログインしているかの表示//ユーザー名が設定できれば良いか
+//signup機能している？新規ユーザー登録
+//ユーザーごとにデータ分かれているか
+//ログアウト機能 //
+//ログインしている時はログインボタン不要//
 //カレンダーのデザイン
 //ログイン画面のデザイン
 //非ログイン時はカレンダーを表示しない
 //ログイン→カレンダー画面の遷移
+//クリックした日付のカウント
+//件数の入力
+//計算結果の表示
