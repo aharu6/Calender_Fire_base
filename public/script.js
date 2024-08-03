@@ -84,21 +84,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           console.log("Document data:", docSnap.data().clicked);
-          saveData(`${year}-${month + 1}-${date}`, docSnap.data().clicked);
+          await saveData(`${year}-${month + 1}-${date}`, docSnap.data().clicked);
           updateCalender(
             `${year}-${month + 1}-${date}`,
             !docSnap.data().clicked
           );
           console.log("updatecalender");
         } else {
-          newSaveData(`${year}-${month + 1}-${date}`, !clickedDates[dateKey]);
-          updateCalender(
-            `${year}-${month + 1}-${date}`,
-            !clickedDates[dateKey]
-          );
-          console.log("newSaveData");
+          awaitnewSaveData(`${year}-${month + 1}-${date}`, true);
+          updateCalender(`${year}-${month + 1}-${date}`, true);
+          console.log("true");
         }
-        countClick();
+        await countClick();
       });
     }
   }
