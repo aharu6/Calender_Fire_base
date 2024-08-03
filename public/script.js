@@ -1,4 +1,5 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+// Firebase SDK の最新バージョンを使用
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
 import {
   getFirestore,
   connectFirestoreEmulator,
@@ -10,31 +11,32 @@ import {
   getDoc,
   query,
   where,
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-import { getCountFromServer } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+  getCountFromServer,
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
 import {
   getAuth,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   onAuthStateChanged,
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
-document.addEventListener("DOMContentLoaded", async () => {
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyD2HsK3flCN9hzKYFU1_iz9CzHEhO8s8mc",
-    authDomain: "calender-1c549.firebaseapp.com",
-    projectId: "calender-1c549",
-    storageBucket: "calender-1c549.appspot.com",
-    messagingSenderId: "242227279891",
-    appId: "1:242227279891:web:b1df4c5be7edb2424fe7e6",
-    measurementId: "G-HQHL3M2B1D",
-  };
-  //firebase initialize
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth();
+} from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
 
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyD2HsK3flCN9hzKYFU1_iz9CzHEhO8s8mc",
+  authDomain: "calender-1c549.firebaseapp.com",
+  projectId: "calender-1c549",
+  storageBucket: "calender-1c549.appspot.com",
+  messagingSenderId: "242227279891",
+  appId: "1:242227279891:web:b1df4c5be7edb2424fe7e6",
+  measurementId: "G-HQHL3M2B1D",
+};
+//firebase initialize
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth();
+
+document.addEventListener("DOMContentLoaded", async () => {
   //emulator
   initializeApp(firebaseConfig);
   const isEmulating = window.location.hostname === "localhost";
@@ -96,7 +98,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           );
           console.log("newSaveData");
         }
-        //countClick();
+        countClick();
       });
     }
   }
@@ -309,16 +311,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("logout").style.display = "none";
     });
   }
-
-  //click day count
-  async function countClick() {
-    const coll = collection(db, "calender");
-    const q = query(coll, where("clicked", "==", "true"));
-    const snapshot = await getAggregate(q, {
-      totalpopulationa: sum("clicked"),
-    });
-  }
 });
+//click day count
+
+async function countClick() {
+  const coll = collection(db, "calender");
+  const q = query(coll, where("clicked", "==", true));
+  const snapshot = await getCountFromServer(q);
+  console.log(snapshot.data().count);
+}
 
 //誰がログインしているかの表示//ユーザー名が設定できれば良いか
 //signup機能している？新規ユーザー登録
