@@ -1,100 +1,106 @@
 h1 {
-    color: red;
-    font-size: 50px;
-  }
-  
-  #month {
-    margin: 1rem;
-  }
-  @media screen and (min-width: 700px) {
-    #dayHead {
-      margin: 2rem;
-      display: flex;
-    }
-    .day-of-week {
-      width: 10rem;
-    }
-    #calender-table{
-      width:100vw;
-    }
-    #calender {
-      margin: 3rem;
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      grid-template-rows: repeat(6, 1fr);
-      width: 15rem;
-      height: 30rem;
-    }
-    .cell {
-      border: 0.01rem solid black;
-      width: 10rem;
-      height: 5rem;
-    }
-  }
-  @media screen and (max-width: 700px) {
-    .navbar{
-      width: 100vw;
-    }
-    #dayHead {
-      margin: 2rem;
-      display: none;
-      grid-template-rows: repeat(6, 1fr);
-      height: 3rem;
-    }
-    .day-of-week {
-      width: 10vw;
-    }
-    tbody{
-      width: fit-content;
-    }
-    #calender-table{
-      width: 100vw;
-    }
-    #calender {
-      margin: 0.3rem;
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      grid-template-rows: repeat(6, 1fr);
-      height: 30vw;
-    }
-    .cell {
-      border: 0.01rem solid black;
-      height: 3rem;
-    }
-  }
-  .clicked {
-    color: blue;
-    background-color: lightgrey;
-  }
-  #monthbutton {
+  color: red;
+  font-size: 50px;
+}
+
+#month {
+  margin: 1rem;
+}
+@media screen and (min-width: 700px) {
+  #dayHead {
+    margin: 2rem;
     display: flex;
-    justify-content: space-between;
   }
-  #preview {
-    /* 水平*/
-    display: flex;
-    border: none;
+  .day-of-week {
+    width: 10rem;
   }
-  #leftarrow {
-    width: 0;
-    height: 0;
-    margin-top: 0.2rem;
-    margin-right: 0.9rem;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-    border-right: 10px solid black;
+  #calender-table {
+    width: 100vw;
   }
-  #next {
-    display: flex;
-    border: none;
+  #calender {
+    margin: 3rem;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    width: 15rem;
+    height: 30rem;
   }
-  #rightarrow {
-    width: 0;
-    height: 0;
-    margin-top: 0.2rem;
-    margin-right: 0.6rem;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-    border-left: 10px solid black;
+  .cell {
+    border: 0.01rem solid black;
+    width: 10rem;
+    height: 5rem;
   }
-  
+}
+@media screen and (max-width: 700px) {
+  .navbar {
+    width: 100vw;
+  }
+  #dayHead {
+    margin: 2rem;
+    display: none;
+    grid-template-rows: repeat(6, 1fr);
+    height: 3rem;
+  }
+  .day-of-week {
+    width: 10vw;
+  }
+  tbody {
+    width: fit-content;
+  }
+  #calender-table {
+    width: 100vw;
+  }
+  #calender {
+    margin: 0.3rem;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    height: 30vw;
+  }
+  .cell {
+    border: 0.01rem solid black;
+    height: 3rem;
+  }
+}
+.clicked {
+  color: blue;
+  background-color: lightgrey;
+}
+#monthbutton {
+  display: flex;
+  justify-content: space-between;
+}
+#preview {
+  /* 水平*/
+  display: flex;
+  border: none;
+}
+#leftarrow {
+  width: 0;
+  height: 0;
+  margin-top: 0.2rem;
+  margin-right: 0.9rem;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 10px solid black;
+}
+#next {
+  display: flex;
+  border: none;
+}
+#rightarrow {
+  width: 0;
+  height: 0;
+  margin-top: 0.2rem;
+  margin-right: 0.6rem;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid black;
+}
+#reload{
+  display: flex;
+  border: none;
+  cursor: pointer;
+  height: 40px;
+  background: none;
+}

@@ -55,8 +55,15 @@
       <button id="preview" class="btn-custom"><div id="leftarrow"></div>preview</button>
       <button id="next" class="btn-custom"><div id="rightarrow"></div>next</button>  
     </div>
-    <div id="day-cout">day</div>
-    <div id="opere-num">num</div>
+    <div style="display: flex;"><p>day: </p><div id="day-count"></div>
+    
+    </div>
+    <div style="display: flex; align-items: center;">
+      <p style="display: flex; align-items: center; height: 40px;line-height: 40px;">num:</p>
+      <input type="number" style="display: flex; width: 3rem; align-items: center;  height: 30px; padding: 0;line-height: 40px;" id = "operate-num" name = "num" required minlength="0" maxlength="400" aria-required="false" />
+    </div>
+      <div style="display: flex;align-items: center; "><p style="align-items: center; display: flex; height: 40px;">per-day:</p><p id="per-day"></p><button id="reload"><img src="www/refresh.svg" style="height: 23px;"/> reload</button></div>
+  </div>
     <table id="dayHead">
       <thead>
         <tr id="calendar-header"></tr>

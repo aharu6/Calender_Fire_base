@@ -78,14 +78,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     today.setMonth(today.getMonth() - 1);
     generateCalender(today.getFullYear(), today.getMonth());
     prevwMonth.textContent = today.getMonth() + 1;
-    const previewMonth = today.setMonth(today.getMonth() - 1);
-    const lastdayPre = new Date(today.getFullYear(), previewMonth, 0);
-    for (let date; date <= lastdayPre.getDate(); date++) {
-      let clicked = getClickdata(date);
-      console.log(clicked);
-      updateCalender(date, clicked);
-    }
     loadData();
+    loadOperateNum();
   });
 
   //next month
@@ -96,6 +90,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     generateCalender(today.getFullYear(), today.getMonth());
     nextMonth.textContent = today.getMonth() + 1;
     loadData();
+    loadOperateNum();
   });
 
   window.signUp = signUp;
@@ -104,7 +99,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.querySelectorAll;
 
-  window.onload = loadData;
+  //operate-num
+  const Num = document.getElementById("operate-num");
+  Num.addEventListener("change", (operateNum) => {
+    const month = document.getElementById("month");
+    //いつも今の月のデータを保存することになるから、loaddataに組み込む形でその月のデータを表示保存sルウときは表示している月の数値にて保存するようにする
+    setoperateNum(month.innerText);
+  });
 
   //observe user
   onAuthStateChanged(auth, (user) => {
@@ -130,7 +131,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   logout.addEventListener("click", () => {
     signOut(auth);
   });
+
+
 });
+
+//wibdow load
+window.addEventListener("load", loadData);
+window.addEventListener("load", loadOperateNum);
+const reloadButton = document.getElementById("reload");
+reloadButton.addEventListener("click", perDay);
+
 //generate calender
 function generateCalender(year, month) {
   calender.innerHTML = "";
@@ -183,15 +193,12 @@ function updateCalender(date, clicked) {
   if (dateElement) {
     if (clicked === true) {
       dateElement.classList.add("clicked");
-      console.log("updatecalenderclicked=true");
     } else if (clicked === false) {
       dateElement.classList.remove("clicked");
-      console.log("updatecalenderclicked = false");
     } else {
       console.log("not clicked");
     }
   }
-  console.log("updatecalenderfunction");
 }
 
 const head_month = document.getElementById("month");
@@ -227,7 +234,7 @@ function signIn(email, password) {
   }
 }
 
-//clickdata save　if docsnap.data().clickedが存在する時
+//clickdata save　if docsnap.data().clickedが存在する時の保存
 async function saveData(date, clicked) {
   try {
     const user = auth.currentUser;
@@ -269,13 +276,12 @@ async function newSaveData(date, clicked) {
 async function loadData() {
   try {
     const user = auth.currentUser;
-    console.log(user.uid);
     if (user) {
       const querySnapshot = await getDocs(collection(db, "calender"));
       querySnapshot.forEach((doc) => {
         const data = doc.data();
         if (data.userId === user.uid) {
-          console.log(`${doc.id} => ${doc.data().clicked}`);
+          //console.log(`${doc.id} => ${doc.data().clicked}`);
           updateCalender(doc.id, doc.data().clicked);
         }
       });
@@ -314,13 +320,67 @@ function signOut(auth) {
 }
 //click day count
 
-async function countClick() {
+async function countClick(countDay) {
   const coll = collection(db, "calender");
   const q = query(coll, where("clicked", "==", true));
   const snapshot = await getCountFromServer(q);
-  console.log(snapshot.data().count);
+  const day_count = document.getElementById("day-count");
+  day_count.textContent = snapshot.data().count;
 }
+//operate-numに入力された数値をfirebaseに保存
+async function setoperateNum(month) {
+  const operateNum = document.getElementById("operate-num").value;
+  const user = auth.currentUser;
+  const docRef = doc(db, "operateNum", month);
+  let newOperateNum = operateNum;
+  await setDoc(docRef, {
+    operateNum: newOperateNum,
+    month: month,
+    userId: user.uid,
+  });
+}
+//すでにデータがある場合は、そのデータを取得して表示する
+async function loadOperateNum() {
+  const month = await document.getElementById("month").innerText;
+  console.log("currentmonth:", month);
+  const docRef = await doc(db, "operateNum", month);
+  try {
+    const docSnap = await getDoc(docRef, where("month", "==", month));
+    const operateNum = document.getElementById("operate-num");
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      operateNum.value = data.operateNum;
+    } else {
+      operateNum.value = 0;
+    }
+  } catch (e) {
+    console.error("Error adding document:", e);
+  }
+}
+//perday
+async function perDay(day, num) {
+  const month = await document.getElementById("month").innerText;
+  console.log("currentmonth:", month);
+  const docRef = await doc(db, "operateNum", month);
+  const docSnap = await getDoc(docRef, where("month", "==", month));
+  let CountNum = 0;
+  const operateNum = document.getElementById("operate-num");
+  if (docSnap.exists()) {
+     CountNum = docSnap.data().operateNum;
+  } else {
+    operateNum.value = 0;
+  }
 
+  let CountDay = 0;
+  const coll = collection(db, "calender");
+  const q = query(coll, where("clicked", "==", true));
+  const snapshot = await getCountFromServer(q);
+  CountDay = snapshot.data().count;
+
+  const perDayResult = CountNum / CountDay;
+  const perDay = document.getElementById("per-day");
+  perDay.textContent = perDayResult;
+}
 //誰がログインしているかの表示//ユーザー名が設定できれば良いか
 //signup機能している？新規ユーザー登録
 //ユーザーごとにデータ分かれているか
@@ -330,6 +390,6 @@ async function countClick() {
 //ログイン画面のデザイン
 //非ログイン時はカレンダーを表示しない
 //ログイン→カレンダー画面の遷移
-//クリックした日付のカウント
-//件数の入力
+//クリックした日付のカウント//
+//件数の入力//
 //計算結果の表示
