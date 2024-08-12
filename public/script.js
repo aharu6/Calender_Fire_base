@@ -1,3 +1,105 @@
+//hambarger menu
+document.addEventListener("DOMContentLoaded", () => {
+  const hambargerMenu = document.getElementById("hambergarMenuButton");
+  const menu = document.getElementById("hambergarMenu");
+  hambargerMenu.addEventListener("click", () => {
+    menu.classList.toggle("is-active");
+  });
+
+  //設定した期間をfirebaseに保管
+  //読み込んだときは最後に保存したデータを表示
+  //なければその時の1月1日をとりあえず設定
+  const saveDate = document.getElementById("saveDatePeriod");
+  saveDate.addEventListener("click", async (event) => {
+    const docRef = doc(db, "datePeriod", "datePeriod");
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      await saveDatePeriod();
+    } else {
+      const startDate = document.getElementById("startDate");
+      const endDate = document.getElementById("endDate");
+      const newStartDate = startDate.value;
+      const newEndDate = endDate.value;
+      await newSaveDatePeriod(newStartDate, newEndDate);
+    }
+    console.log("saveDatePeriod");
+  });
+});
+//loadDatePeriod
+window.addEventListener("load", loadDatePeriod);
+
+async function saveDatePeriod() {
+  const startDate = document.getElementById("startDate");
+  const endDate = document.getElementById("endDate");
+  const docRef = doc(db, "datePeriod", "datePeriod");
+  const docSnap = getDoc(docRef);
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      setDoc(docRef, {
+        startDate: startDate.value,
+        endDate: endDate.value,
+        userid: user.uid,
+      });
+    }
+  } catch (e) {
+    console.error("Error save datePeriod:", e);
+  }
+}
+async function newSaveDatePeriod(startDate, endDate) {
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      const docRef = doc(db, "datePeriod", "datePeriod");
+      let newStartDate = startDate;
+      let newEndDate = endDate;
+      await setDoc(docRef, {
+        startDate: newStartDate,
+        endDate: newEndDate,
+        userid: user.uid,
+      });
+    }
+  } catch (e) {
+    console.error("Error adding document:", e);
+  }
+}
+async function loadDatePeriod() {
+  const startDate = document.getElementById("startDate");
+  const endDate = document.getElementById("endDate");
+  try {
+    const docRef = doc(db, "datePeriod", "datePeriod");
+    const docSnap = await getDoc(docRef);
+    console.log(docSnap.data().startDate);
+    startDate.value = docSnap.data().startDate;
+    endDate.value = docSnap.data().endDate;
+  } catch (e) {
+    console.error("Error load datePeriod:", e);
+  }
+}
+//overlay
+document.addEventListener("DOMContentLoaded", () => {
+  const overlay = document.getElementById("overlay");
+  const hambargerMenu = document.getElementById("hambergarMenuButton");
+  const menu = document.getElementById("hambergarMenu");
+  hambargerMenu.addEventListener("click", () => {
+    overlay.classList.add("is-active");
+    hambargerMenu.classList.add("is-open");
+  });
+
+  overlay.addEventListener("click", () => {
+    overlay.classList.remove("is-active");
+    hambargerMenu.classList.remove("is-open");
+    menu.classList.remove("is-active");
+  });
+
+  const close = document.getElementById("close-navPage");
+  close.addEventListener("click", () => {
+    overlay.classList.remove("is-active");
+    hambargerMenu.classList.remove("is-open");
+    menu.classList.remove("is-active");
+  });
+});
+
 // Firebase SDK の最新バージョンを使用
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js";
 import {
@@ -79,6 +181,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     generateCalender(today.getFullYear(), today.getMonth());
     prevwMonth.textContent = today.getMonth() + 1;
     loadData();
+    countClick();
     loadOperateNum();
   });
 
@@ -90,6 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     generateCalender(today.getFullYear(), today.getMonth());
     nextMonth.textContent = today.getMonth() + 1;
     loadData();
+    countClick();
     loadOperateNum();
   });
 
@@ -99,11 +203,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.querySelectorAll;
 
-  //operate-num
+  //totalnum 設定した月の期間の合計日数を表示する
+
+  //operate-num　of month　月毎の件数入力部分後にカレンダーの下に行く予定
   const Num = document.getElementById("operate-num");
   Num.addEventListener("change", (operateNum) => {
     const month = document.getElementById("month");
-    //いつも今の月のデータを保存することになるから、loaddataに組み込む形でその月のデータを表示保存sルウときは表示している月の数値にて保存するようにする
+    //いつも今の月のデータを保存することになるから、loaddataに組み込む形でその月のデータを表示保存するときは表示している月の数値にて保存するようにする
     setoperateNum(month.innerText);
   });
 
@@ -131,8 +237,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   logout.addEventListener("click", () => {
     signOut(auth);
   });
-
-
 });
 
 //wibdow load
@@ -168,7 +272,7 @@ function generateCalender(year, month) {
       const docRef = doc(db, "calender", dateKey);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        console.log("Document data:", docSnap.data().clicked);
+        //console.log("Document data:", docSnap.data().clicked);
         await saveData(`${year}-${month + 1}-${date}`, docSnap.data().clicked);
         updateCalender(`${year}-${month + 1}-${date}`, !docSnap.data().clicked);
         console.log("updatecalender");
@@ -320,7 +424,7 @@ function signOut(auth) {
 }
 //click day count
 
-async function countClick(countDay) {
+async function countClick() {
   const coll = collection(db, "calender");
   const q = query(coll, where("clicked", "==", true));
   const snapshot = await getCountFromServer(q);
@@ -342,7 +446,6 @@ async function setoperateNum(month) {
 //すでにデータがある場合は、そのデータを取得して表示する
 async function loadOperateNum() {
   const month = await document.getElementById("month").innerText;
-  console.log("currentmonth:", month);
   const docRef = await doc(db, "operateNum", month);
   try {
     const docSnap = await getDoc(docRef, where("month", "==", month));
@@ -366,7 +469,7 @@ async function perDay(day, num) {
   let CountNum = 0;
   const operateNum = document.getElementById("operate-num");
   if (docSnap.exists()) {
-     CountNum = docSnap.data().operateNum;
+    CountNum = docSnap.data().operateNum;
   } else {
     operateNum.value = 0;
   }
@@ -377,7 +480,9 @@ async function perDay(day, num) {
   const snapshot = await getCountFromServer(q);
   CountDay = snapshot.data().count;
 
-  const perDayResult = CountNum / CountDay;
+  const perDayOrigin = CountNum / CountDay;
+  const perDayResult = Math.round(perDayOrigin * 100) / 100;
+
   const perDay = document.getElementById("per-day");
   perDay.textContent = perDayResult;
 }
@@ -392,4 +497,5 @@ async function perDay(day, num) {
 //ログイン→カレンダー画面の遷移
 //クリックした日付のカウント//
 //件数の入力//
-//計算結果の表示
+//計算結果の表示//
+//日付と件数を集計する期間を設定できるようにする

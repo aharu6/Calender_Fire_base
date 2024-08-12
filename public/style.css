@@ -1,11 +1,177 @@
+:root {
+  --body-font: "Poppins", sans-serif;
+  --heding-font: "Poppins", sans-serif;
+  --swiper-navigation-size: 44px;
+}
+body {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-hjghlight-color: transparent;
+}
+.d-flex {
+  display: flex !important;
+}
+.display-2 {
+  font-size: calc(1.575rem+3.9vw);
+  line-height: 1.2;
+}
+.row {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 0;
+}
 h1 {
   color: red;
   font-size: 50px;
 }
+.text-h5-size {
+  font-size: xx-large;
+}
+
+/*hambarger menu*/
+.menu-container {
+  position: relative;
+}
+.navbar-toggler.is-open {
+  pointer-events: none;
+}
+.nav-menu {
+  display: none;
+  position: fixed;
+  right: 0;
+  width: 90%;
+  height: 100%;
+  box-shadow: rgba(0, 0, 0, 0.1);
+  background-color: aliceblue;
+  z-index: 1001;
+  transition: top 0.4s ease;
+}
+.nav-menu.is-active {
+  display: block;
+  top: 0;
+}
+
+/* ovaerlay styling*/
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+/* show the overlay when active */
+.overlay.is-active {
+  opacity: 1;
+  pointer-events: all;
+  width: 10%;
+}
+/* hambarger area */
+.hambaegar-area {
+  width: 90%;
+  height: 100%;
+  background-color: aliceblue;
+  right: 0;
+  display: none;
+}
+.hambaegar-area.is-active {
+  display: block;
+}
+/* accordion title*/
+.title {
+  display: relative;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: normal;
+  padding: 3% 3% 3% 50px;
+  transition: all 0.5s ease;
+}
+
+.title::before,
+.title::after {
+  position: absolute;
+  content: "";
+  width: 15px;
+  height: 2px;
+  background-color: #3b82c5;
+}
+
+.title::before {
+  left: 15px;
+  transform: rotate(0deg);
+}
+.title::after {
+  left: 15px;
+  transform: rotate(90deg);
+}
+/* close */
+.title.open::before {
+  transform: rotate(45deg);
+}
+.title.open::after {
+  transform: rotate(-45deg);
+}
+
+/* accordion content area */
+.box {
+  display: none;
+  background-color: #addef8;
+  margin: 0 3% 3% 3%;
+  padding: 3%;
+}
+
+/*result*/
+#reload {
+  display: flex;
+  border: none;
+  cursor: pointer;
+  height: 40px;
+  background: none;
+}
+/*margin*/
+.margin {
+  height: 15vw;
+}
+
+/*calender*/
 
 #month {
   margin: 1rem;
 }
+
+#preview {
+  /* 水平*/
+  display: flex;
+  border: none;
+}
+#leftarrow {
+  width: 0;
+  height: 0;
+  margin-top: 0.2rem;
+  margin-right: 0.9rem;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-right: 10px solid black;
+}
+#next {
+  display: flex;
+  border: none;
+}
+#rightarrow {
+  width: 0;
+  height: 0;
+  margin-top: 0.2rem;
+  margin-right: 0.6rem;
+  margin-left: 0.6rem;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  border-left: 10px solid black;
+}
+
+/** media fit calender **/
 @media screen and (min-width: 700px) {
   #dayHead {
     margin: 2rem;
@@ -55,7 +221,6 @@ h1 {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-template-rows: repeat(6, 1fr);
-    height: 30vw;
   }
   .cell {
     border: 0.01rem solid black;
@@ -66,41 +231,34 @@ h1 {
   color: blue;
   background-color: lightgrey;
 }
+.container {
+  width: 100%;
+  padding-right: var(-bs-gutter-x, 0.75rem);
+  padding-left: var(-bs-gutter-x, 0.75rem);
+  margin-left: auto;
+}
+.fw-semibold {
+  font-weight: 600;
+}
+.text-primary {
+  color: #3b82c5;
+}
+.align-items-center {
+  align-items: center !important;
+}
+.justify-content-between {
+  justify-content: center !important;
+
+  margin-right: auto;
+}
 #monthbutton {
   display: flex;
   justify-content: space-between;
 }
-#preview {
-  /* 水平*/
-  display: flex;
-  border: none;
-}
-#leftarrow {
-  width: 0;
-  height: 0;
-  margin-top: 0.2rem;
-  margin-right: 0.9rem;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-right: 10px solid black;
-}
-#next {
-  display: flex;
-  border: none;
-}
-#rightarrow {
-  width: 0;
-  height: 0;
-  margin-top: 0.2rem;
-  margin-right: 0.6rem;
-  border-top: 10px solid transparent;
-  border-bottom: 10px solid transparent;
-  border-left: 10px solid black;
-}
-#reload{
-  display: flex;
-  border: none;
-  cursor: pointer;
-  height: 40px;
-  background: none;
+
+/*month result*/
+#month_result {
+  clear: both;
+  display: block;
+  margin: auto;
 }
