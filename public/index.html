@@ -13,7 +13,7 @@
   <body>
     <nav class="navbar navbar-light bg-light p-3">
       <div class="d-flex col-12 col-md-3 col-lg-2 mb-2 mb-lg-0 flex-wrap flex-md-nowrap justify-content-between" style="width: 100%;">
-        <a class="navbar-brand" href="#">calender</a>
+        <a class="navbar-brand" href="#" id="appTitle">calender</a>
         <div class="menu-container">
           <button id="hambergarMenuButton" class="navbar-toggler d-md-none collapsed mb-3" type="button" data-toggle="collapse" data-target="#sidebar" aria-controls="sidebar" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -24,24 +24,30 @@
     </nav>
     <nav id="hambergarMenu" class="nav-menu">
       <nav class="nav flex-column">
-        <li><h3>Settings</h3>
-          <div>
-            <h5>Period</h5>
-            <form action="" id="dateSetting"></form>
-            <label for="startDate">startDate</label>
-            <input type="date" id="startDate" name = "startDate">
-            <label for="endDate">endDate</label>
-            <input type="date" id="endDate" name="endDate">
-            <button type="submit" id="saveDatePeriod">Save</button>
-          </div>
-        </li>
         <li>
-          <a href="#close" id="close-navPage">close</a>
+          <div style="width: 100%; height: 25px;"></div>
+          <h3 id="SettingsTitle1">Period</h3>
+          <div style="display: flex; flex-wrap: wrap; width: 100%; justify-content: center;">
+            <form action="" id="dateSetting"></form>
+            <label for="startDate"></label>
+            <input type="date" id="startDate" name = "startDate">
+            <p style="margin-left: 4%; margin-right: 4%;">~</p>
+            <label for="endDate"></label>
+            <input type="date" id="endDate" name="endDate">
+            
+          </div>
+          <div style="width: 100%; display: flex; justify-content: center;"><button type="submit" id="saveDatePeriod">Save</button></div>
+        </li>
+        <li><div style="width: 100%;display: flex; justify-content: center;"><button id= "logout">logout</button></div></li>
+        <li>
+          <button id ="close-navPage"><svg class="iconArrowRight" width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10 6L15.2929 11.2929C15.6834 11.6834 15.6834 12.3166 15.2929 12.7071L10 18" stroke="#ffffff" stroke-linecap="round"/>
+          </svg></button>
+          
         </li>
     </nav>
   </nav>
     <div class="overlay" id="overlay"></div>
-      <section id="Settings"> Settings</section>
       <div class="col-12 col-md-4 col-lg-2">
         <input class="form-control form-control-dark" type="text" placeholder="Search" aria-label="Search">
       </div>
@@ -60,17 +66,21 @@
   </div>
 </nav>
 <div>
-  <h2>Sign Up</h2>
-  <input type="email" id = "signUpEmail" placeholder="email">
-  <input type="password" id="signUpPassword" placeholder="password">
-  <button onclick="signUp()">Sign Up</button>
+  <h2 id="signUptitle">Sign Up</h2>
+  <div style="display: flex;flex-wrap: wrap;">
+    <input type="email" id = "signUpEmail" placeholder="email">
+    <input type="password" id="signUpPassword" placeholder="password">
+  </div>
+  <button id="signUp" onclick="signUp()">Sign Up</button>
 </div>
 <div>
-  <h2>Sign In</h2>
-  <input type="email" id="signInEmail" placeholder="email">
-  <input type="password" id="signInPassword" placeholder="password">
+  <h2 id="signIntitle">Sign In</h2>
+  <div style="display: flex;flex-wrap: wrap;">
+    <input type="email" id="signInEmail" placeholder="email">
+    <input type="password" id="signInPassword" placeholder="password">
+  </div>
   <button onclick="signIn()" id="signIn">Sign In</button>
-  <button id= "logout">logout</button>
+  
 </div>
 <div class="container">
   <div class="row">
@@ -80,14 +90,14 @@
       <div class="counter-number text-primary-500 display-2 fw-semibold d-flex align-items-center justify-content-center"></div>
     </div>
   </div>
-  <p style="display: flex; align-items: center; height: 40px;line-height: 40px;">day: </p><div id="day-count" class="text-h5-size"></div>
+  <p style="display: flex; align-items: center; height: 40px;line-height: 40px;">day </p><div id="day-count" class="text-h5-size"></div>
 </div>
 <div class="col-lg-3 col-md-6 col-sm-3">
-  <p style="display: flex; align-items: center; height: 40px;line-height: 40px;">num:</p>
+  <p style="display: flex; align-items: center; height: 40px;line-height: 40px;">num</p>
   <input class="text-h5-size" type="number" style="display: flex; width: 3rem; align-items: center;  height: 40px; padding: 0;line-height: 40px;" id = "operate-num" name = "num" required minlength="0" maxlength="400" aria-required="false" />
 </div>
 <div class="col-lg-3 col-md-6 col-sm-3">
-  <p style="align-items: center; display: flex; height: 40px;">per-day:</p><p id="per-day" class="text-h5-size"></p><button id="reload"><img src="www/refresh.svg" style="height: 23px;"/> reload</button>
+  <p style="align-items: center; display: flex; height: 40px;">per-day</p><p id="per-day" class="text-h5-size"></p><button id="reload"><img src="www/refresh.svg" style="height: 23px;"/> reload</button>
 </div>
 <div class="col-lg-3 col-md6" col-sm-3>
 
@@ -97,8 +107,8 @@
 </div>
 <div class="margin"></div>
 <div id="monthbutton">
-  <button id="preview" class="btn-custom"><div id="leftarrow"></div>preview</button>
-  <button id="next" class="btn-custom">next<div id="rightarrow"></div></button>  
+  <button id="preview" class="btn-custom"><div id="leftarrow"></div></button>
+  <button id="next" class="btn-custom"><div id="rightarrow"></div></button>  
 </div>
 <div id = "month" class="fs-1"></div>
 <table id="dayHead">

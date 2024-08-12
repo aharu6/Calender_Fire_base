@@ -26,6 +26,58 @@ h1 {
   font-size: xx-large;
 }
 
+/* sign up*/
+#signUpEmail{
+  border-radius: 9px;
+  height: 62px;
+  margin: 2%;
+}
+#signUpPassword{
+  border-radius: 9px;
+  height: 62px;
+  margin: 2%;
+}
+
+#signUp {
+  background-color: #3b82c5;
+  color: #fff;
+  border: none;
+  border-radius: 32px;
+  height: 62px;
+  width: 90%;
+}
+
+/* login */
+#signInEmail{
+  border-radius: 9px;
+  height: 62px;
+margin: 2%;
+}
+#signInPassword{
+  border-radius: 9px;
+  height: 62px;
+margin: 2%;
+}
+#signIn{
+  background-color: #3b82c5;
+  color: #fff;
+  border: none;
+  border-radius: 32px;
+  height: 62px;
+  width: 90%;
+}
+#logout {
+  background-color: #3b82c5;
+  color: #fff;
+  border: none;
+  border-radius: 32px;
+  height: 2rem;
+  width: 90%;
+}
+/* navbar */
+#appTitle {
+  font-size: xx-large;
+}
 /*hambarger menu*/
 .menu-container {
   position: relative;
@@ -40,7 +92,7 @@ h1 {
   width: 90%;
   height: 100%;
   box-shadow: rgba(0, 0, 0, 0.1);
-  background-color: aliceblue;
+  background-color: #fff;
   z-index: 1001;
   transition: top 0.4s ease;
 }
@@ -73,7 +125,7 @@ h1 {
 .hambaegar-area {
   width: 90%;
   height: 100%;
-  background-color: aliceblue;
+  background-color: #fff;
   right: 0;
   display: none;
 }
@@ -81,6 +133,11 @@ h1 {
   display: block;
 }
 /* accordion title*/
+
+#SettingsTitle1 {
+  text-decoration: underline;
+  text-align: center;
+}
 .title {
   display: relative;
   cursor: pointer;
@@ -90,39 +147,41 @@ h1 {
   transition: all 0.5s ease;
 }
 
-.title::before,
-.title::after {
-  position: absolute;
-  content: "";
-  width: 15px;
-  height: 2px;
+/* calender */
+#startDate {
+  border-radius: 9px;
+  border-color: #3b82c5;
+  width: fit-content;
+  height: fit-content;
+}
+#endDate {
+  border-radius: 9px;
+  border-color: #3b82c5;
+  width: fit-content;
+  height: fit-content;
+}
+#saveDatePeriod {
+  width: 90%;
+  height: 2rem;
+  border-radius: 32px;
+  border: none;
   background-color: #3b82c5;
+  color: #fff;
+  margin: 2%;
+}
+#close-navPage {
+  align-items: center;
+  width: 80px;
+  aspect-ratio: 1;
+  background-color: #3b82c5;
+  border-radius: 50%;
+  border: none;
+  margin: 2%;
 }
 
-.title::before {
-  left: 15px;
-  transform: rotate(0deg);
+.col-lg-3.col-md-6.col-sm-3 {
+  width: 33%;
 }
-.title::after {
-  left: 15px;
-  transform: rotate(90deg);
-}
-/* close */
-.title.open::before {
-  transform: rotate(45deg);
-}
-.title.open::after {
-  transform: rotate(-45deg);
-}
-
-/* accordion content area */
-.box {
-  display: none;
-  background-color: #addef8;
-  margin: 0 3% 3% 3%;
-  padding: 3%;
-}
-
 /*result*/
 #reload {
   display: flex;
@@ -154,7 +213,7 @@ h1 {
   margin-right: 0.9rem;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
-  border-right: 10px solid black;
+  border-right: 10px solid #3b82c5;
 }
 #next {
   display: flex;
@@ -168,7 +227,7 @@ h1 {
   margin-left: 0.6rem;
   border-top: 10px solid transparent;
   border-bottom: 10px solid transparent;
-  border-left: 10px solid black;
+  border-left: 10px solid #3b82c5;
 }
 
 /** media fit calender **/
@@ -228,8 +287,8 @@ h1 {
   }
 }
 .clicked {
-  color: blue;
-  background-color: lightgrey;
+  color: #fff;
+  background-color: #3b82c5;
 }
 .container {
   width: 100%;

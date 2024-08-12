@@ -222,6 +222,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const dropdownMenuButton = document.getElementById("dropdownMenuButton");
       dropdownMenuButton.textContent = auth.currentUser.uid;
       //login noView
+      document.getElementById("signUptitle").style.display = "none";
+      document.getElementById("signUpEmail").style.display = "none";
+      document.getElementById("signUpPassword").style.display = "none";
+      document.getElementById("signUp").style.display = "none";
+      document.getElementById("signIntitle").style.display = "none";
       document.getElementById("signInEmail").style.display = "none";
       document.getElementById("signInPassword").style.display = "none";
       document.getElementById("signIn").style.display = "none";
