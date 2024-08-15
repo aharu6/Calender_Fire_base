@@ -193,7 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     nextMonth.textContent = `${today.getFullYear()}- ${today.getMonth() + 1}`;
     loadData();
     countClick();
-    loadOperateNum()
+    loadOperateNum();
   });
 
   window.signUp = signUp;
