@@ -193,7 +193,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     nextMonth.textContent = `${today.getFullYear()}- ${today.getMonth() + 1}`;
     loadData();
     countClick();
-    loadOperateNum();
+    loadOperateNum()
   });
 
   window.signUp = signUp;
@@ -208,6 +208,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const month = document.getElementById("month");
     //いつも今の月のデータを保存することになるから、loaddataに組み込む形でその月のデータを表示保存するときは表示している月の数値にて保存するようにする
     setoperateNum(month.innerText);
+    loadTotalNum();
+    console.log("operateNum run");
   });
 
   //observe user
@@ -519,6 +521,7 @@ async function loadTotalNum() {
   });
   numbox.textContent = totalNum;
 }
+
 //perday
 async function perDay(day, num) {
   const month = await document.getElementById("month").innerText;
