@@ -90,15 +90,19 @@
       <div class="counter-number text-primary-500 display-2 fw-semibold d-flex align-items-center justify-content-center"></div>
     </div>
   </div>
-  <p style="display: flex; align-items: center; height: 40px;line-height: 40px;">day </p><div id="day-count" class="text-h5-size"></div>
+  <p style="display: flex; align-items: center; height: 40px;line-height: 40px;">day </p><div id="day-count" class="text-h5-size contents"></div>
 </div>
 <div class="col-lg-3 col-md-6 col-sm-3">
   <p style="align-items: center; display: flex; height: 40px;">num</p>
-  <div id="totalNum" class="text-h5-size"></div>
+  <div id="totalNum" class="text-h5-size contents"></div>
 </div>
 
 <div class="col-lg-3 col-md-6 col-sm-3">
-  <p style="align-items: center; display: flex; height: 40px;">per-day</p><p id="per-day" class="text-h5-size"></p><button id="reload"><img src="www/refresh.svg" style="height: 23px;"/> reload</button>
+  <p style="align-items: center; display: flex; height: 40px; text-align: center;">per-day</p>
+  <div style="height: 48px;">
+    <p id="per-day" class="text-h5-size contents"></p>
+  </div>
+  <button id="reload"><img src="www/refresh.svg" style="height: 23px;"/> reload</button>
 </div>
 <div class="col-lg-3 col-md6" col-sm-3>
 
@@ -125,9 +129,19 @@
   <div id="click"></div>
   <script src = "script.js" type="module"></script>
   <div id="month_result">month result</div>
-  <div class="col-lg-3 col-md-6 col-sm-3">
-    <p style="display: flex; align-items: center; height: 40px;line-height: 40px;">num</p>
-    <input class="text-h5-size" type="number" style="display: flex; width: 3rem; align-items: center;  height: 40px; padding: 0;line-height: 40px;" id = "operate-num" name = "num" required minlength="0" maxlength="400" aria-required="false" />
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-3 col-md-6 col-sm-3">
+        <p style="display: flex; align-items: center; height: 40px;line-height: 40px;">num</p>
+        <input class="text-h5-size" type="number" style="display: flex; width: 3rem; align-items: center;  height: 40px; padding: 0;line-height: 40px;" id = "operate-num" name = "num" required minlength="0" maxlength="400" aria-required="false" />
+      </div>
+    </div>
   </div>
-
+  
+  <div style="height: 33px;"></div>
+<footer>
+  <ul class="footer-nav">
+    <p><small>a_.haru2024</small></p>
+  </ul>
+</footer>
 </html>

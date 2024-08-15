@@ -25,14 +25,16 @@ h1 {
 .text-h5-size {
   font-size: xx-large;
 }
+.text-h5-size.contents{
 
+}
 /* sign up*/
-#signUpEmail{
+#signUpEmail {
   border-radius: 9px;
   height: 62px;
   margin: 2%;
 }
-#signUpPassword{
+#signUpPassword {
   border-radius: 9px;
   height: 62px;
   margin: 2%;
@@ -48,17 +50,17 @@ h1 {
 }
 
 /* login */
-#signInEmail{
+#signInEmail {
   border-radius: 9px;
   height: 62px;
-margin: 2%;
+  margin: 2%;
 }
-#signInPassword{
+#signInPassword {
   border-radius: 9px;
   height: 62px;
-margin: 2%;
+  margin: 2%;
 }
-#signIn{
+#signIn {
   background-color: #3b82c5;
   color: #fff;
   border: none;
@@ -205,6 +207,7 @@ margin: 2%;
   /* 水平*/
   display: flex;
   border: none;
+  background: none;
 }
 #leftarrow {
   width: 0;
@@ -218,6 +221,7 @@ margin: 2%;
 #next {
   display: flex;
   border: none;
+  background: none;
 }
 #rightarrow {
   width: 0;
@@ -320,4 +324,21 @@ margin: 2%;
   clear: both;
   display: block;
   margin: auto;
+}
+
+/*footer*/
+footer {
+  background-color: #3b82c5;
+  color: #fff;
+  padding: 3rem;
+  text-align: center;
+}
+footer ul {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+footer small {
+  color: aliceblue;
+  font-size: 0.875rem;
 }
