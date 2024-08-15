@@ -69,7 +69,6 @@ async function loadDatePeriod() {
   try {
     const docRef = doc(db, "datePeriod", "datePeriod");
     const docSnap = await getDoc(docRef);
-    console.log(docSnap.data().startDate);
     startDate.value = docSnap.data().startDate;
     endDate.value = docSnap.data().endDate;
   } catch (e) {
@@ -179,7 +178,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const prevwMonth = document.getElementById("month");
     today.setMonth(today.getMonth() - 1);
     generateCalender(today.getFullYear(), today.getMonth());
-    prevwMonth.textContent = today.getMonth() + 1;
+    prevwMonth.textContent = `${today.getFullYear()}-${today.getMonth() + 1}`;
     loadData();
     countClick();
     loadOperateNum();
@@ -191,7 +190,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const nextMonth = document.getElementById("month");
     today.setMonth(today.getMonth() + 1);
     generateCalender(today.getFullYear(), today.getMonth());
-    nextMonth.textContent = today.getMonth() + 1;
+    nextMonth.textContent = `${today.getFullYear()}- ${today.getMonth() + 1}`;
     loadData();
     countClick();
     loadOperateNum();
@@ -202,8 +201,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   window.signIn = signIn;
 
   document.querySelectorAll;
-
-  //totalnum 設定した月の期間の合計日数を表示する
 
   //operate-num　of month　月毎の件数入力部分後にカレンダーの下に行く予定
   const Num = document.getElementById("operate-num");
@@ -244,11 +241,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-//wibdow load
+//window load
 window.addEventListener("load", loadData);
 window.addEventListener("load", loadOperateNum);
 const reloadButton = document.getElementById("reload");
 reloadButton.addEventListener("click", perDay);
+//totalnum 設定した月の期間の合計日数を表示する
+window.addEventListener("load", loadTotalNum);
 
 //generate calender
 function generateCalender(year, month) {
@@ -311,7 +310,8 @@ function updateCalender(date, clicked) {
 }
 
 const head_month = document.getElementById("month");
-head_month.textContent = today.getMonth() + 1;
+head_month.textContent = `${today.getFullYear()}- ${today.getMonth() + 1}`;
+
 //add user
 //signUp
 function signUp(email, password) {
@@ -354,8 +354,11 @@ async function saveData(date, clicked) {
       let newClickedData = !clicked;
       const data = docSnap.data();
       console.log(newClickedData);
-      await setDoc(docRef, { clicked: newClickedData, userId: user.uid });
-      console.log("Document written with ID;", docRef.id, newClickedData);
+      await setDoc(docRef, {
+        clicked: newClickedData,
+        userId: user.uid,
+        date: new Date(date),
+      });
     } else {
       console.error("No user is signed in");
     }
@@ -372,7 +375,11 @@ async function newSaveData(date, clicked) {
       const docRef = doc(db, "calender", date);
       const docSnap = await getDoc(docRef);
       let newClickedData = clicked;
-      await setDoc(docRef, { clicked: newClickedData, userId: user.uid });
+      await setDoc(docRef, {
+        clicked: newClickedData,
+        userId: user.uid,
+        date: new Date(date),
+      });
     } else {
       console.error("No user is signed in");
     }
@@ -427,14 +434,32 @@ function signOut(auth) {
     document.getElementById("logout").style.display = "none";
   });
 }
-//click day count
 
+//click day count
+//setting period set
 async function countClick() {
+  //setting period
+  const docRef = doc(db, "datePeriod", "datePeriod");
+  const setdayDoc = await getDoc(docRef);
+  //start month
+  const startDate = new Date(setdayDoc.data().startDate);
+  //end month
+  const endDate = new Date(setdayDoc.data().endDate);
+  //clicked count start~end
   const coll = collection(db, "calender");
-  const q = query(coll, where("clicked", "==", true));
-  const snapshot = await getCountFromServer(q);
-  const day_count = document.getElementById("day-count");
-  day_count.textContent = snapshot.data().count;
+  const q = query(
+    coll,
+    where("clicked", "==", true),
+    where("date", ">=", startDate),
+    where("date", "<=", endDate)
+  );
+  try {
+    const snapshot = await getCountFromServer(q);
+    const day_count = document.getElementById("day-count");
+    day_count.textContent = snapshot.data().count;
+  } catch (e) {
+    console.log("Error getting count:", error);
+  }
 }
 //operate-numに入力された数値をfirebaseに保存
 async function setoperateNum(month) {
@@ -442,9 +467,10 @@ async function setoperateNum(month) {
   const user = auth.currentUser;
   const docRef = doc(db, "operateNum", month);
   let newOperateNum = operateNum;
+  //後に設定期間分を合計するのでmonthはdate型での保管が必要 西暦-月 をdate型にすると自動的にその月の1日になるらしい
   await setDoc(docRef, {
     operateNum: newOperateNum,
-    month: month,
+    month: new Date(month),
     userId: user.uid,
   });
 }
@@ -465,10 +491,37 @@ async function loadOperateNum() {
     console.error("Error adding document:", e);
   }
 }
+//totalnum of settig petiod
+async function loadTotalNum() {
+  //load setting period
+  const docRef = doc(db, "datePeriod", "datePeriod");
+  const docSnap = await getDoc(docRef);
+  const startDate = new Date(docSnap.data().startDate);
+  const endDate = new Date(docSnap.data().endDate);
+  //count num setting period
+  const numbox = document.getElementById("totalNum");
+  const coll = collection(db, "operateNum");
+  //serarch data while setting period
+  const q = query(
+    coll,
+    where("month", ">=", startDate),
+    where("month", "<=", endDate)
+  );
+  const qSnapshot = await getDocs(q);
+  let totalNum = 0;
+  qSnapshot.forEach((doc) => {
+    const data = doc.data().operateNum;
+    console.log(data);
+    const operateNum = parseInt(data, 10);
+    if (!isNaN(operateNum)) {
+      totalNum += operateNum;
+    }
+  });
+  numbox.textContent = totalNum;
+}
 //perday
 async function perDay(day, num) {
   const month = await document.getElementById("month").innerText;
-  console.log("currentmonth:", month);
   const docRef = await doc(db, "operateNum", month);
   const docSnap = await getDoc(docRef, where("month", "==", month));
   let CountNum = 0;
@@ -503,4 +556,5 @@ async function perDay(day, num) {
 //クリックした日付のカウント//
 //件数の入力//
 //計算結果の表示//
-//日付と件数を集計する期間を設定できるようにする
+//日付と件数を集計する期間を設定できるようにする//
+//設定した期間で合計日数と件数を表示するようにする
