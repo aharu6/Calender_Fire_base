@@ -527,14 +527,9 @@ async function perDay(day, num) {
   const month = await document.getElementById("month").innerText;
   const docRef = await doc(db, "operateNum", month);
   const docSnap = await getDoc(docRef, where("month", "==", month));
-  let CountNum = 0;
-  const operateNum = document.getElementById("operate-num");
-  if (docSnap.exists()) {
-    CountNum = docSnap.data().operateNum;
-  } else {
-    operateNum.value = 0;
-  }
-
+  const operateNum = document.getElementById("totalNum");
+  const CountNum = operateNum.innerText;
+  
   let CountDay = 0;
   const coll = collection(db, "calender");
   const q = query(coll, where("clicked", "==", true));
