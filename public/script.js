@@ -154,10 +154,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     calnederheader.appendChild(th);
   });
 
-  const calender = document.getElementById("calender");
-  const click = document.getElementById("click");
-  let clickedDates = JSON.parse(localStorage.getItem("clickedDates")) || {};
-
   generateCalender(today.getFullYear(), today.getMonth());
   countClick();
 
@@ -181,7 +177,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     prevwMonth.textContent = `${today.getFullYear()}-${today.getMonth() + 1}`;
     loadData();
     countClick();
-    loadOperateNum();
+    loadOperateNum(`${today.getFullYear()}-${today.getMonth() + 1}`);
+    loadTotalNum();
   });
 
   //next month
@@ -193,7 +190,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     nextMonth.textContent = `${today.getFullYear()}- ${today.getMonth() + 1}`;
     loadData();
     countClick();
-    loadOperateNum();
+    loadOperateNum(`${today.getFullYear()}-${today.getMonth() + 1}`);
+    loadTotalNum();
   });
 
   window.signUp = signUp;
@@ -208,14 +206,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const month = document.getElementById("month");
     //いつも今の月のデータを保存することになるから、loaddataに組み込む形でその月のデータを表示保存するときは表示している月の数値にて保存するようにする
     setoperateNum(month.innerText);
+    loadOperateNum(`${today.getFullYear()}-${today.getMonth() + 1}`);
+    console.log("setoperateNum");
     loadTotalNum();
-    console.log("operateNum run");
   });
 
   //observe user
   onAuthStateChanged(auth, (user) => {
     if (user) {
       loadData(user);
+      loadOperateNum(`${today.getFullYear()}-${today.getMonth() + 1}`);
+      loadTotalNum();
       console.log("User is logged in:", auth.currentUser.uid);
       //id = dropdownMenuButtonにatuth.CurrentUser.uidを入れる
       const dropdownMenuButton = document.getElementById("dropdownMenuButton");
@@ -230,7 +231,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("signInPassword").style.display = "none";
       document.getElementById("signIn").style.display = "none";
       document.getElementById("logout").style.display = "block";
-      console.log(auth.currentUser.uid);
     } else {
       console.log("User is logged out");
     }
@@ -243,12 +243,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-//window load
+//window loaded
 window.addEventListener("load", loadData);
-window.addEventListener("load", loadOperateNum);
+
 const reloadButton = document.getElementById("reload");
 reloadButton.addEventListener("click", perDay);
-//totalnum 設定した月の期間の合計日数を表示する
+window.addEventListener("load", loadOperateNum);
 window.addEventListener("load", loadTotalNum);
 
 //generate calender
@@ -281,7 +281,7 @@ function generateCalender(year, month) {
         //console.log("Document data:", docSnap.data().clicked);
         await saveData(`${year}-${month + 1}-${date}`, docSnap.data().clicked);
         updateCalender(`${year}-${month + 1}-${date}`, !docSnap.data().clicked);
-        console.log("updatecalender");
+        //console.log("updatecalender");
       } else {
         await newSaveData(`${year}-${month + 1}-${date}`, true);
         updateCalender(`${year}-${month + 1}-${date}`, true);
@@ -338,6 +338,7 @@ function signIn(email, password) {
       (userCredential) => {
         const user = userCredential.user;
         console.log("User logged in:", user);
+        loadOperateNum(`${today.getFullYear()}-${today.getMonth() + 1}`);
       }
     );
   } catch (error) {
@@ -361,6 +362,7 @@ async function saveData(date, clicked) {
         userId: user.uid,
         date: new Date(date),
       });
+      loadOperateNum(`${today.getFullYear()}-${today.getMonth() + 1}`);
     } else {
       console.error("No user is signed in");
     }
@@ -453,14 +455,15 @@ async function countClick() {
     coll,
     where("clicked", "==", true),
     where("date", ">=", startDate),
-    where("date", "<=", endDate)
+    where("date", "<=", endDate),
+    where("userId", "==", auth.currentUser.uid)
   );
   try {
     const snapshot = await getCountFromServer(q);
     const day_count = document.getElementById("day-count");
     day_count.textContent = snapshot.data().count;
   } catch (e) {
-    console.log("Error getting count:", error);
+    console.log("Error getting count:", e);
   }
 }
 //operate-numに入力された数値をfirebaseに保存
@@ -477,12 +480,17 @@ async function setoperateNum(month) {
   });
 }
 //すでにデータがある場合は、そのデータを取得して表示する
-async function loadOperateNum() {
-  const month = await document.getElementById("month").innerText;
+async function loadOperateNum(newmonth) {
+  const month = newmonth;
+  console.log(month);
   const docRef = await doc(db, "operateNum", month);
+  const operateNum = document.getElementById("operate-num");
   try {
-    const docSnap = await getDoc(docRef, where("month", "==", month));
-    const operateNum = document.getElementById("operate-num");
+    const docSnap = await getDoc(
+      docRef,
+      where("month", "==", month),
+      where("userId", "==", auth.currentUser.uid)
+    );
     if (docSnap.exists()) {
       const data = docSnap.data();
       operateNum.value = data.operateNum;
@@ -504,32 +512,33 @@ async function loadTotalNum() {
   const numbox = document.getElementById("totalNum");
   const coll = collection(db, "operateNum");
   //serarch data while setting period
-  const q = query(
-    coll,
-    where("month", ">=", startDate),
-    where("month", "<=", endDate)
-  );
-  const qSnapshot = await getDocs(q);
-  let totalNum = 0;
-  qSnapshot.forEach((doc) => {
-    const data = doc.data().operateNum;
-    console.log(data);
-    const operateNum = parseInt(data, 10);
-    if (!isNaN(operateNum)) {
-      totalNum += operateNum;
-    }
-  });
-  numbox.textContent = totalNum;
+  if (docSnap.exists()) {
+    const q = query(
+      coll,
+      where("month", ">=", startDate),
+      where("month", "<=", endDate)
+    );
+    const qSnapshot = await getDocs(q);
+
+    let totalNum = 0;
+    qSnapshot.forEach((doc) => {
+      const data = doc.data().operateNum;
+      const operateNum = parseInt(data, 10);
+      if (!isNaN(operateNum)) {
+        totalNum += operateNum;
+      }
+    });
+    numbox.textContent = totalNum;
+  } else {
+    numbox.textContent = 0;
+  }
 }
 
 //perday
 async function perDay(day, num) {
-  const month = await document.getElementById("month").innerText;
-  const docRef = await doc(db, "operateNum", month);
-  const docSnap = await getDoc(docRef, where("month", "==", month));
   const operateNum = document.getElementById("totalNum");
   const CountNum = operateNum.innerText;
-  
+
   let CountDay = 0;
   const coll = collection(db, "calender");
   const q = query(coll, where("clicked", "==", true));
