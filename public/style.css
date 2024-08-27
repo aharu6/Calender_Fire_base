@@ -25,8 +25,7 @@ h1 {
 .text-h5-size {
   font-size: xx-large;
 }
-.text-h5-size.contents{
-
+.text-h5-size.contents {
 }
 /* sign up*/
 #signUpEmail {
@@ -76,6 +75,23 @@ h1 {
   height: 2rem;
   width: 90%;
 }
+/* login error*/
+#alert {
+  color: red;
+  font-size: 1rem;
+  text-align: center;
+}
+#errorCode {
+  color: red;
+  font-size: 1rem;
+  text-align: center;
+}
+#errorMessage {
+  color: red;
+  font-size: 1rem;
+  text-align: center;
+}
+
 /* navbar */
 #appTitle {
   font-size: xx-large;

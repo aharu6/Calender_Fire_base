@@ -19,6 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const startDate = document.getElementById("startDate");
       const endDate = document.getElementById("endDate");
       const newStartDate = startDate.value;
+      console.log(newStartDate);
       const newEndDate = endDate.value;
       await newSaveDatePeriod(newStartDate, newEndDate);
     }
@@ -31,7 +32,7 @@ window.addEventListener("load", loadDatePeriod);
 async function saveDatePeriod() {
   const startDate = document.getElementById("startDate");
   const endDate = document.getElementById("endDate");
-  const docRef = doc(db, "datePeriod", "datePeriod");
+  const docRef = doc(db, "datePeriod", auth.currentUser.uid);
   const docSnap = getDoc(docRef);
   try {
     const user = auth.currentUser;
@@ -207,7 +208,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     //いつも今の月のデータを保存することになるから、loaddataに組み込む形でその月のデータを表示保存するときは表示している月の数値にて保存するようにする
     setoperateNum(month.innerText);
     loadOperateNum(`${today.getFullYear()}-${today.getMonth() + 1}`);
-    console.log("setoperateNum");
     loadTotalNum();
   });
 
@@ -231,6 +231,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       document.getElementById("signInPassword").style.display = "none";
       document.getElementById("signIn").style.display = "none";
       document.getElementById("logout").style.display = "block";
+      //default
+      loadOperateNum(`${today.getFullYear()}-${today.getMonth() + 1}`);
+      loadTotalNum();
     } else {
       console.log("User is logged out");
     }
@@ -343,6 +346,15 @@ function signIn(email, password) {
     );
   } catch (error) {
     console.error("Error:", error);
+    //alert("メールアドレスまたはパスワードが間違っています");
+    const alert = document.getElementById("alert");
+    alert.textContent = "メールアドレスまたはパスワードが間違っています";
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    const errorCodeText = document.getElementById("errorCode");
+    errorCodeText.textContent = errorCode;
+    const errorMessageText = document.getElementById("errorMessage");
+    errorMessageText.textContent = errorMessage;
   }
 }
 
@@ -466,7 +478,7 @@ async function countClick() {
     console.log("Error getting count:", e);
   }
 }
-//operate-numに入力された数値をfirebaseに保存
+//operate-numに入力された数値をfirebaseに保存 saveoperatenum
 async function setoperateNum(month) {
   const operateNum = document.getElementById("operate-num").value;
   const user = auth.currentUser;
@@ -481,32 +493,40 @@ async function setoperateNum(month) {
 }
 //すでにデータがある場合は、そのデータを取得して表示する
 async function loadOperateNum(newmonth) {
-  const month = newmonth;
-  console.log(month);
-  const docRef = await doc(db, "operateNum", month);
+  const month = new Date(newmonth);
   const operateNum = document.getElementById("operate-num");
+  if (!auth.currentUser) {
+    console.error("No user is signed in");
+    operateNum.value = 0;
+    return;
+  }
   try {
-    const docSnap = await getDoc(
-      docRef,
-      where("month", "==", month),
-      where("userId", "==", auth.currentUser.uid)
+    const docSnap = await query(
+      collection(db, "operateNum"),
+      where("userId", "==", auth.currentUser.uid),
+      where("month", "==", month)
     );
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      operateNum.value = data.operateNum;
-    } else {
+    const snapShot = await getDocs(docSnap);
+    if (snapShot.empty) {
       operateNum.value = 0;
+      console.log("No such document!");
+    } else {
+      snapShot.forEach((doc) => {
+        operateNum.value = doc.data().operateNum;
+      });
     }
   } catch (e) {
+    operateNum.value = 0;
     console.error("Error adding document:", e);
   }
 }
 //totalnum of settig petiod
 async function loadTotalNum() {
   //load setting period
-  const docRef = doc(db, "datePeriod", "datePeriod");
+  const docRef = doc(db, "datePeriod", auth.currentUser.uid);
   const docSnap = await getDoc(docRef);
   const startDate = new Date(docSnap.data().startDate);
+  console.log(startDate);
   const endDate = new Date(docSnap.data().endDate);
   //count num setting period
   const numbox = document.getElementById("totalNum");
@@ -516,14 +536,16 @@ async function loadTotalNum() {
     const q = query(
       coll,
       where("month", ">=", startDate),
-      where("month", "<=", endDate)
+      where("month", "<=", endDate),
+      where("userId", "==", auth.currentUser.uid)
     );
     const qSnapshot = await getDocs(q);
-
+    console.log(qSnapshot);
     let totalNum = 0;
     qSnapshot.forEach((doc) => {
       const data = doc.data().operateNum;
       const operateNum = parseInt(data, 10);
+      console.log(operateNum);
       if (!isNaN(operateNum)) {
         totalNum += operateNum;
       }
@@ -538,12 +560,28 @@ async function loadTotalNum() {
 async function perDay(day, num) {
   const operateNum = document.getElementById("totalNum");
   const CountNum = operateNum.innerText;
+  //setting period
+  const docRef = doc(db, "datePeriod", "datePeriod");
+  const setdayDoc = await getDoc(docRef);
+  //start month
+  const startDate = new Date(setdayDoc.data().startDate);
+  //end month
+  const endDate = new Date(setdayDoc.data().endDate);
+  //clicked count start~end
+  const coll = collection(db, "calender");
+  const q = query(
+    coll,
+    where("clicked", "==", true),
+    where("date", ">=", startDate),
+    where("date", "<=", endDate),
+    where("userId", "==", auth.currentUser.uid)
+  );
 
   let CountDay = 0;
-  const coll = collection(db, "calender");
-  const q = query(coll, where("clicked", "==", true));
   const snapshot = await getCountFromServer(q);
   CountDay = snapshot.data().count;
+  console.log("countday:", CountDay);
+  console.log("coutnum:", CountNum);
 
   const perDayOrigin = CountNum / CountDay;
   const perDayResult = Math.round(perDayOrigin * 100) / 100;
