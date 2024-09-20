@@ -68,7 +68,7 @@ async function loadDatePeriod() {
   const startDate = document.getElementById("startDate");
   const endDate = document.getElementById("endDate");
   try {
-    const docRef = doc(db, "datePeriod", "datePeriod");
+    const docRef = doc(db, "datePeriod", auth.currentUser.uid);
     const docSnap = await getDoc(docRef);
     startDate.value = docSnap.data().startDate;
     endDate.value = docSnap.data().endDate;
@@ -248,11 +248,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 //window loaded
 window.addEventListener("load", loadData);
+window.addEventListener("load", countClick);
 
 const reloadButton = document.getElementById("reload");
 reloadButton.addEventListener("click", perDay);
 window.addEventListener("load", loadOperateNum);
-window.addEventListener("load", loadTotalNum);
 
 //generate calender
 function generateCalender(year, month) {
@@ -454,23 +454,25 @@ function signOut(auth) {
 //click day count
 //setting period set
 async function countClick() {
-  //setting period
-  const docRef = doc(db, "datePeriod", "datePeriod");
-  const setdayDoc = await getDoc(docRef);
-  //start month
-  const startDate = new Date(setdayDoc.data().startDate);
-  //end month
-  const endDate = new Date(setdayDoc.data().endDate);
-  //clicked count start~end
-  const coll = collection(db, "calender");
-  const q = query(
-    coll,
-    where("clicked", "==", true),
-    where("date", ">=", startDate),
-    where("date", "<=", endDate),
-    where("userId", "==", auth.currentUser.uid)
-  );
   try {
+    //setting period
+    const docRef = await doc(db, "datePeriod", auth.currentUser.uid);
+    console.log(auth.currentUser.uid);
+    const setdayDoc = await getDoc(docRef);
+    //start month
+    const startDate = new Date(setdayDoc.data().startDate);
+    //end month
+    const endDate = new Date(setdayDoc.data().endDate);
+    console.log(endDate);
+    //clicked count start~end
+    const coll = collection(db, "calender");
+    const q = query(
+      coll,
+      where("clicked", "==", true),
+      where("date", ">=", startDate),
+      where("date", "<=", endDate),
+      where("userId", "==", auth.currentUser.uid)
+    );
     const snapshot = await getCountFromServer(q);
     const day_count = document.getElementById("day-count");
     day_count.textContent = snapshot.data().count;
@@ -493,14 +495,14 @@ async function setoperateNum(month) {
 }
 //すでにデータがある場合は、そのデータを取得して表示する
 async function loadOperateNum(newmonth) {
-  const month = new Date(newmonth);
-  const operateNum = document.getElementById("operate-num");
-  if (!auth.currentUser) {
-    console.error("No user is signed in");
-    operateNum.value = 0;
-    return;
-  }
   try {
+    const month = new Date(newmonth);
+    const operateNum = document.getElementById("operate-num");
+    if (!auth.currentUser) {
+      console.error("No user is signed in");
+      operateNum.value = 0;
+      return;
+    }
     const docSnap = await query(
       collection(db, "operateNum"),
       where("userId", "==", auth.currentUser.uid),
@@ -522,37 +524,39 @@ async function loadOperateNum(newmonth) {
 }
 //totalnum of settig petiod
 async function loadTotalNum() {
-  //load setting period
-  const docRef = doc(db, "datePeriod", auth.currentUser.uid);
-  const docSnap = await getDoc(docRef);
-  const startDate = new Date(docSnap.data().startDate);
-  console.log(startDate);
-  const endDate = new Date(docSnap.data().endDate);
-  //count num setting period
-  const numbox = document.getElementById("totalNum");
-  const coll = collection(db, "operateNum");
-  //serarch data while setting period
-  if (docSnap.exists()) {
-    const q = query(
-      coll,
-      where("month", ">=", startDate),
-      where("month", "<=", endDate),
-      where("userId", "==", auth.currentUser.uid)
-    );
-    const qSnapshot = await getDocs(q);
-    console.log(qSnapshot);
-    let totalNum = 0;
-    qSnapshot.forEach((doc) => {
-      const data = doc.data().operateNum;
-      const operateNum = parseInt(data, 10);
-      console.log(operateNum);
-      if (!isNaN(operateNum)) {
-        totalNum += operateNum;
-      }
-    });
-    numbox.textContent = totalNum;
-  } else {
-    numbox.textContent = 0;
+  try {
+    //load setting period
+    const docRef = await doc(db, "datePeriod", auth.currentUser.uid);
+    const docSnap = await getDoc(docRef);
+    const startDate = new Date(docSnap.data().startDate);
+    const endDate = new Date(docSnap.data().endDate);
+    //count num setting period
+    const numbox = document.getElementById("totalNum");
+    const coll = collection(db, "operateNum");
+    //serarch data while setting period
+    if (docSnap.exists()) {
+      const q = query(
+        coll,
+        where("month", ">=", startDate),
+        where("month", "<=", endDate),
+        where("userId", "==", auth.currentUser.uid)
+      );
+      const qSnapshot = await getDocs(q);
+      let totalNum = 0;
+      qSnapshot.forEach((doc) => {
+        const data = doc.data().operateNum;
+        const operateNum = parseInt(data, 10);
+        //console.log(operateNum);
+        if (!isNaN(operateNum)) {
+          totalNum += operateNum;
+        }
+      });
+      numbox.textContent = totalNum;
+    } else {
+      numbox.textContent = 0;
+    }
+  } catch (e) {
+    console.error("Error adding document:", e);
   }
 }
 
