@@ -1,0 +1,18 @@
+name: "artifacts cleanup"
+on:
+  # 毎日0時に自動実行
+  schedule:
+    - cron: "0 0 * * *" # UTC
+
+  # 手動実行
+  workflow_dispatch:
+
+jobs:
+  delete-artifacts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Delete artifacts
+        uses: kolpav/purge-artifacts-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          expire-in: 30 minutes
